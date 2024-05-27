@@ -150,36 +150,37 @@ def edit_transaksi():
     cur.close()
     conn.close()
     print("Data transaksi berhasil diperbarui!")
-
+ 
 def logout():
     print("Anda telah log out.")
        
+def masukadmin():
+    while True:
+        print('\n Selamat Datang Admin!')
+        login_admin()
+        break
 
 def menuAdmin():
+    while True :
         print_large_text('\nSelamat Datang Admin ! ')
-        login_admin()
-        # break 
-        while True:
-            print("Lanjutkan ke menu berikutnya.")
-            print('1. Lihat Data Pelanggan')
-            print('2. Edit Data Pelanggan')
-            print('3. Lihat Data Transaksi')
-            print('4. Edit Data Transaksi')
-            print('5. Logout')
-            pilihan = input('Pilih menu 1 - 5 : ')
+        print("Lanjutkan ke menu berikutnya.")
+        print('1. Lihat Data Pelanggan')
+        print('2. Edit Data Pelanggan')
+        print('3. Lihat Data Transaksi')
+        print('4. Edit Data Transaksi')
+        print('5. Logout')
+        pilihan = input('Pilih menu 1 - 5 : ')
             
-            if pilihan == '1':
-                lihat_pelanggan()
-            elif pilihan == '2':
-                edit_data_pelanggan()
-            elif pilihan == '3':
-                lihat_transaksi()
-            elif pilihan == '4':
-                edit_transaksi()
-            elif pilihan == '5':
-                logout()
-                break
-            else:
-                print("Pilihan tidak valid, silakan pilih angka 1 sampai 5")
-
-menuAdmin()
+        if pilihan == '1':
+            lihat_pelanggan()
+        elif pilihan == '2':
+            edit_data_pelanggan()
+        elif pilihan == '3':
+            lihat_transaksi()
+        elif pilihan == '4':
+            edit_transaksi()
+        elif pilihan == '5':
+            logout()
+            break
+        else:
+            print("Pilihan tidak valid, silakan pilih angka 1 sampai 5")
