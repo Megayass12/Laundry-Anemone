@@ -156,13 +156,12 @@ def logout():
        
 def masukadmin():
     while True:
-        print('\n Selamat Datang Admin!')
+        print_large_text('\nSelamat Datang Admin ! ')
         login_admin()
         break
 
 def menuAdmin():
     while True :
-        print_large_text('\nSelamat Datang Admin ! ')
         print("Lanjutkan ke menu berikutnya.")
         print('1. Lihat Data Pelanggan')
         print('2. Edit Data Pelanggan')
