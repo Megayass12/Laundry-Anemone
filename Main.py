@@ -1,11 +1,11 @@
-import Admin  as ad
+import Admin as ad
 import Owner as ow
 import Customer as pel
 
 import pyfiglet
 from tabulate import tabulate
 
-def print_large_text(text):
+def text_besar(text):
     ascii_art = pyfiglet.figlet_format(text)
     lines = ascii_art.split("\n")
     max_length = max(len(line) for line in lines)
@@ -18,7 +18,7 @@ def print_large_text(text):
 
 def main():
     while True:
-        print_large_text('\nWelcome to Anemone Laundry! ')
+        text_besar('\nWelcome to Anemone Laundry! ')
         print('1. Masuk sebagai owner') # Register
         print('2. Masuk sebagai admin') # Login
         print('3. Masuk sebagai customer')
