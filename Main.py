@@ -1,8 +1,6 @@
 import Admin as ad
 import Owner as ow
 import Customer as pel
-
-import pyfiglet
 from tabulate import tabulate
 
 

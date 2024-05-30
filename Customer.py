@@ -463,7 +463,7 @@ def menu_pelanggan():
             cancel_transaction(logged_in_id)
         elif pilihan == '6' and logged_in_id:
             logout()
-            logged_in_id = None
+            break
         else:
             print("Pilihan tidak valid, silahkan pilih menu yang tersedia")
             

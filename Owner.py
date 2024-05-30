@@ -1,5 +1,7 @@
 import psycopg2
-import pyfiglet
+import datetime as dt
+from tabulate import tabulate
+
 def get_connection():
     return psycopg2.connect(
         database='Anemone Abangkuh', 
@@ -8,8 +10,6 @@ def get_connection():
         host='localhost', 
         port='5432'
     )
-
-
 
 # Fungsi login owner
 def login_owner():
@@ -33,13 +33,20 @@ def login_owner():
 def lihat_pelanggan():
     conn = get_connection()
     cur = conn.cursor()
-    query = "SELECT * FROM pelanggan"
+    query = """
+    SELECT pel.id_pelanggan, pel.nama, pel.nomor, pel.username, pel.password, al.detail ||','||kel.nama||','||kec.nama||','||al.kabupaten as Alamat
+    from pelanggan pel
+    join alamat al on al.id_rumah = pel.alamat_id_rumah 
+    join kecamatan kec ON kec.id_kecamatan = al.kecamatan_id_kecamatan
+    join kelurahan kel ON kel.id_kelurahan = al.kelurahan_id_kelurahan
+    order by id_pelanggan asc"""
     cur.execute(query)
     pelanggan = cur.fetchall()
+    col_names = [desc[0] for desc in cur.description]
     cur.close()
     conn.close()
-    for i in pelanggan:
-        print(i)
+    # for i in pelanggan:
+    print(tabulate(pelanggan, headers=col_names, tablefmt="pretty"))
 
 # Fungsi tambah akun admin
 def tambah_pegawai():
@@ -48,10 +55,10 @@ def tambah_pegawai():
     nama = input('Masukkan nama admin : ')
     nomor = input('Masukkan nomor admin : ')
     jabatan = input('Masukkan jabatan (owner/karyawan/admin/kurir) : ')
-    alamat = input('Masukkan alamat : ')
+    username = input('Masukkan username pegawai: ')
     pw = input('Masukkan password: ')
-    query = 'INSERT INTO pegawai (nama, nomor, jabatan, alamat, password) VALUES (%s, %s, %s, %s, %s)'
-    cur.execute(query, (nama, nomor, jabatan, alamat, pw))
+    query = 'INSERT INTO pegawai (nama, nomor, jabatan, username, password) VALUES (%s, %s, %s, %s, %s)'
+    cur.execute(query, (nama, nomor, jabatan, username, pw))
     conn.commit()
     cur.close()
     conn.close()
@@ -74,10 +81,21 @@ def lihat_transaksi():
     join layanan_laundry lyn on (lyn.id_layanan = dtl.layanan_laundry_id_layanan)'''
     cur.execute(query)
     transaksi = cur.fetchall()
+    col_names = [desc[0] for desc in cur.description]
     cur.close()
     conn.close()
+    
+    formatted_transaksi = []
     for transaction in transaksi:
-        print(transaction)
+        formatted_transaction = tuple(
+            elem.strftime("%Y-%m-%d") 
+            if isinstance(elem, dt.date) 
+            else elem
+            for elem in transaction
+        )
+        formatted_transaksi.append(formatted_transaction)
+
+    print(tabulate(formatted_transaksi, headers=col_names, tablefmt="pretty"))
 
 # Fungsi lihat data pegawai
 def lihat_pegawai():
