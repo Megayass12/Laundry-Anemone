@@ -9,16 +9,7 @@ def get_connection():
         port='5432'
     )
 
-def print_large_text(text):
-    ascii_art = pyfiglet.figlet_format(text)
-    lines = ascii_art.split("\n")
-    max_length = max(len(line) for line in lines)
-    border = "+" + "-"*(max_length + 2) + "+"
-    
-    print(border)
-    for line in lines:
-        print("| " + line.ljust(max_length) + " |")
-    print(border)
+
 
 # Fungsi login owner
 def login_owner():
@@ -107,7 +98,7 @@ def logout():
 # Fungsi menu utama
 def masukowner():
     while True:
-        print_large_text('\nSelamat Datang Owner !')
+        print('\n====Selamat Datang Owner !====')
         login_owner()
         break
 

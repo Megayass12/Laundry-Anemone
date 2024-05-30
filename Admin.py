@@ -12,17 +12,6 @@ def get_connection():
         port='5432'
     )
 
-def print_large_text(text):
-    ascii_art = pyfiglet.figlet_format(text)
-    lines = ascii_art.split("\n")
-    max_length = max(len(line) for line in lines)
-    border = "+" + "-"*(max_length + 2) + "+"
-    
-    print(border)
-    for line in lines:
-        print("| " + line.ljust(max_length) + " |")
-    print(border)
-
 def login_admin():
     conn = get_connection()
     cur = conn.cursor()
@@ -156,7 +145,7 @@ def logout():
        
 def masukadmin():
     while True:
-        print_large_text('\nSelamat Datang Admin ! ')
+        print('\n====Selamat Datang Admin !===== ')
         login_admin()
         break
 

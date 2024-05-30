@@ -5,20 +5,13 @@ import Customer as pel
 import pyfiglet
 from tabulate import tabulate
 
-def text_besar(text):
-    ascii_art = pyfiglet.figlet_format(text)
-    lines = ascii_art.split("\n")
-    max_length = max(len(line) for line in lines)
-    border = "+" + "-"*(max_length + 2) + "+"
-    
-    print(border)
-    for line in lines:
-        print("| " + line.ljust(max_length) + " |")
-    print(border)
+
 
 def main():
     while True:
-        text_besar('\nWelcome to Anemone Laundry! ')
+        print('='*100)
+        print('==== Welcome to Anemone Laundry!==== '.center(100))
+        print('='*100)
         print('1. Masuk sebagai owner') # Register
         print('2. Masuk sebagai admin') # Login
         print('3. Masuk sebagai customer')
