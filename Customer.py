@@ -5,9 +5,9 @@ from tabulate import tabulate
 # Integrasi database
 def get_connection():
     return psycopg2.connect(
-        database='anemonev6',
+        database='Anemone Abangkuh',
         user='postgres',
-        password='321',
+        password='mega1234',
         host='localhost',
         port='5432'
     )
@@ -210,7 +210,7 @@ def tambah_transaksi(customer_id):
             dl.id_detail, 
             dl.harga, 
             jp.nama AS jenis_paket, 
-            ll.nama AS layanan_laundry
+            ll.nama AS layanan_laundry, ll.waktu as Waktu
         FROM 
             detail_layanan dl
         JOIN 
@@ -221,7 +221,7 @@ def tambah_transaksi(customer_id):
         """
         cur.execute(query_detail_layanan)
         rows = cur.fetchall()
-        nama_kolom = ["ID Detail", "Harga", "Jenis Paket", "Layanan Laundry"]
+        nama_kolom = ["ID Detail", "Harga", "Jenis Paket", "Layanan Laundry","Waktu"]
         print(tabulate(rows, headers=nama_kolom, tablefmt='psql'))
         jenis_paket = input("Pilih jenis paket (ID): ")
         
@@ -229,18 +229,23 @@ def tambah_transaksi(customer_id):
         tgl_pengantaran = input("Tanggal Pengantaran (YYYY-MM-DD): ")
 
         # Display available payment methods
-        cur.execute("SELECT id_pembayaran, tipe_pembayaran FROM mtd_bayar")
-        rows = cur.fetchall()
-        nama_kolom = ["ID Pembayaran", "Tipe Pembayaran"]
-        print(tabulate(rows, headers=nama_kolom, tablefmt='psql'))
+        # cur.execute("SELECT id_pembayaran, tipe_pembayaran FROM mtd_bayar")
+        # rows = cur.fetchall()
+        # nama_kolom = ["ID Pembayaran", "Tipe Pembayaran"]
+        # print(tabulate(rows, headers=nama_kolom, tablefmt='psql'))
+        metode = [
+            ["1","Cash"],
+            ["2", "Transfer"]
+        ]
+        print(tabulate(metode, headers=["Id", "Metode"], tablefmt="grid"))
         metode_pembayaran = input("Pilih metode pembayaran (ID): ")
 
         # Display available employees
-        cur.execute("SELECT id_pegawai, nama FROM pegawai Where jabatan = 'Admin'")
-        rows = cur.fetchall()
-        nama_kolom = ["ID Pegawai", "Nama Pegawai"]
-        print(tabulate(rows, headers=nama_kolom, tablefmt='psql'))
-        pegawai_id = input("Pilih pegawai kasir (ID): ")
+        # cur.execute("SELECT id_pegawai, nama FROM pegawai Where jabatan = 'Admin'")
+        # rows = cur.fetchall()
+        # nama_kolom = ["ID Pegawai", "Nama Pegawai"]
+        # print(tabulate(rows, headers=nama_kolom, tablefmt='psql'))
+        # pegawai_id = input("Pilih pegawai kasir (ID): ")
 
         # Insert new transaction
         query = """
@@ -251,7 +256,7 @@ def tambah_transaksi(customer_id):
         """
         subtotal = 0  # Replace with appropriate subtotal calculation
         ttl_brt = 0.0  # Replace with appropriate total weight calculation
-        cur.execute(query, (customer_id, jenis_parfum, jenis_paket, tgl_pickup, tgl_pengantaran, metode_pembayaran, subtotal, ttl_brt, pegawai_id))
+        cur.execute(query, (customer_id, jenis_parfum, jenis_paket, tgl_pickup, tgl_pengantaran, metode_pembayaran, subtotal, ttl_brt))
         transaksi_id = cur.fetchone()[0]
         
         conn.commit()

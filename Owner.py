@@ -5,9 +5,9 @@ import os
 
 def get_connection():
     return psycopg2.connect(
-        database='anemonev6', 
+        database='Anemone Abangkuh', 
         user='postgres', 
-        password='321', 
+        password='mega1234', 
         host='localhost', 
         port='5432'
     )
@@ -36,7 +36,7 @@ def lihat_pelanggan():
     conn = get_connection()
     cur = conn.cursor()
     query = """
-    SELECT pel.id_pelanggan, pel.nama, pel.nomor, pel.username, pel.password, al.detail ||','||kel.nama||','||kec.nama||','||al.kabupaten as Alamat
+    SELECT pel.id_pelanggan, pel.nama, pel.nomor, al.detail ||','||kel.nama||','||kec.nama||','||al.kabupaten as Alamat
     from pelanggan pel
     join alamat al on al.id_rumah = pel.alamat_id_rumah 
     join kecamatan kec ON kec.id_kecamatan = al.kecamatan_id_kecamatan
