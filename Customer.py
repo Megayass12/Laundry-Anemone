@@ -5,9 +5,9 @@ from tabulate import tabulate
 # Integrasi database
 def get_connection():
     return psycopg2.connect(
-        database='Anemone Abangkuh',
+        database='anemonev6',
         user='postgres',
-        password='mega1234',
+        password='321',
         host='localhost',
         port='5432'
     )
@@ -189,6 +189,7 @@ def edit_data_pelanggan(id_pelanggan):
         conn.close()
 
 # Fungsi tambah transaksi
+
 def tambah_transaksi(customer_id):
     conn = None
     cur = None
@@ -196,14 +197,14 @@ def tambah_transaksi(customer_id):
         conn = get_connection()
         cur = conn.cursor()
         
-        # Tampilkan daftar jenis parfum
+        # Display available perfumes
         cur.execute("SELECT id_parfum, nama FROM jenis_parfum")
         rows = cur.fetchall()
         nama_kolom = ["ID Parfum", "Nama Parfum"]
         print(tabulate(rows, headers=nama_kolom, tablefmt='psql'))
         jenis_parfum = input("Pilih parfum (ID): ")
 
-        # Tampilkan daftar detail layanan dengan join
+        # Display available service details
         query_detail_layanan = """
         SELECT 
             dl.id_detail, 
@@ -226,24 +227,37 @@ def tambah_transaksi(customer_id):
         
         tgl_pickup = input("Tanggal Pick-Up (YYYY-MM-DD): ")
         tgl_pengantaran = input("Tanggal Pengantaran (YYYY-MM-DD): ")
-        metode_pembayaran = input("Input ID metode pembayaran (1. Cash / 2. Transfer): ")
 
-        # Insert transaksi baru
+        # Display available payment methods
+        cur.execute("SELECT id_pembayaran, tipe_pembayaran FROM mtd_bayar")
+        rows = cur.fetchall()
+        nama_kolom = ["ID Pembayaran", "Tipe Pembayaran"]
+        print(tabulate(rows, headers=nama_kolom, tablefmt='psql'))
+        metode_pembayaran = input("Pilih metode pembayaran (ID): ")
+
+        # Display available employees
+        cur.execute("SELECT id_pegawai, nama FROM pegawai Where jabatan = 'Admin'")
+        rows = cur.fetchall()
+        nama_kolom = ["ID Pegawai", "Nama Pegawai"]
+        print(tabulate(rows, headers=nama_kolom, tablefmt='psql'))
+        pegawai_id = input("Pilih pegawai kasir (ID): ")
+
+        # Insert new transaction
         query = """
         INSERT INTO transaksi (
             pelanggan_id_pelanggan, jenis_parfum_id_parfum, detail_layanan_id_detail, 
-            ttl_diterima, ttl_selesai, mtd_bayar_id_pembayaran, subtotal, ttl_brt
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id_transaksi
+            ttl_diterima, ttl_selesai, mtd_bayar_id_pembayaran, subtotal, ttl_brt, pegawai_id_pegawai
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id_transaksi
         """
-        subtotal = "0"  # Ganti dengan perhitungan subtotal yang sesuai
-        ttl_brt = 0.0   # Ganti dengan berat total yang sesuai
-        cur.execute(query, (customer_id, jenis_parfum, jenis_paket, tgl_pickup, tgl_pengantaran, metode_pembayaran, subtotal, ttl_brt))
+        subtotal = 0  # Replace with appropriate subtotal calculation
+        ttl_brt = 0.0  # Replace with appropriate total weight calculation
+        cur.execute(query, (customer_id, jenis_parfum, jenis_paket, tgl_pickup, tgl_pengantaran, metode_pembayaran, subtotal, ttl_brt, pegawai_id))
         transaksi_id = cur.fetchone()[0]
         
         conn.commit()
         print("Transaksi berhasil ditambahkan!")
 
-        # Tampilkan transaksi yang baru ditambahkan
+        # Display the newly added transaction
         query_transaksi = """
         SELECT 
             tr.id_transaksi, 
@@ -254,7 +268,8 @@ def tambah_transaksi(customer_id):
             pf.nama AS jenis_parfum, 
             mb.tipe_pembayaran, 
             tr.subtotal, 
-            tr.ttl_brt
+            tr.ttl_brt, 
+            pg.nama AS pegawai
         FROM 
             transaksi tr
         JOIN 
@@ -267,13 +282,15 @@ def tambah_transaksi(customer_id):
             jenis_parfum pf ON tr.jenis_parfum_id_parfum = pf.id_parfum
         JOIN 
             mtd_bayar mb ON tr.mtd_bayar_id_pembayaran = mb.id_pembayaran
+        JOIN 
+            pegawai pg ON tr.pegawai_id_pegawai = pg.id_pegawai
         WHERE 
             tr.id_transaksi = %s
         """
         cur.execute(query_transaksi, (transaksi_id,))
         transaksi_baru = cur.fetchone()
         if transaksi_baru:
-            headers = ["ID Transaksi", "Tanggal Diterima", "Tanggal Selesai", "Jenis Paket", "Layanan Laundry", "Jenis Parfum", "Metode Pembayaran", "Subtotal", "Total Berat"]
+            headers = ["ID Transaksi", "Tanggal Diterima", "Tanggal Selesai", "Jenis Paket", "Layanan Laundry", "Jenis Parfum", "Metode Pembayaran", "Subtotal", "Total Berat", "Pegawai"]
             print(tabulate([transaksi_baru], headers=headers, tablefmt='psql'))
     except Exception as e:
         if conn:
@@ -285,7 +302,6 @@ def tambah_transaksi(customer_id):
         if conn:
             conn.close()
 
-# Fungsi lihat history transaksi
 def lihat_transaksi(customer_id):
     conn = get_connection()
     cur = conn.cursor()
@@ -293,13 +309,14 @@ def lihat_transaksi(customer_id):
         SELECT 
             tr.id_transaksi AS "ID Transaksi", 
             tr.ttl_diterima AS "Tgl Diterima", 
-            tr.ttl_selesai AS "Tgl Selesai", 
+            tr.ttl_selesai AS "Tgl Selesai",
             jp.nama AS "Jenis Paket", 
             ll.nama AS "Layanan Laundry", 
             pf.nama AS "Jenis Parfum", 
             mb.tipe_pembayaran AS "Metode Bayar", 
             tr.subtotal AS "Subtotal", 
-            tr.ttl_brt AS "Total Berat"
+            tr.ttl_brt AS "Total Berat",
+            tr.stat_bayar as "status pembayaran"
         FROM 
             transaksi tr
         JOIN 
@@ -315,7 +332,7 @@ def lihat_transaksi(customer_id):
         JOIN
             pelanggan pl ON tr.pelanggan_id_pelanggan = pl.id_pelanggan
         WHERE
-            pl.id_pelanggan = %s
+            pl.id_pelanggan = %s and stat_bayar = 'Lunas'
         """
     cur.execute(query_histori, (customer_id,))
     transactions = cur.fetchall()
@@ -324,11 +341,157 @@ def lihat_transaksi(customer_id):
         print("Tidak ada transaksi yang ditemukan untuk pelanggan ini.")
         return
     
-    headers = ["ID Transaksi", "Tanggal Diterima", "Tanggal Selesai", "Jenis Paket", "Layanan Laundry", "Jenis Parfum", "Metode Pembayaran", "Subtotal", "Total Berat"]
+    headers = ["ID Transaksi", "Tanggal Diterima", "Tanggal Selesai", "Jenis Paket", "Layanan Laundry", "Jenis Parfum", "Metode Pembayaran", "Subtotal", "Total Berat","status"]
     print(tabulate(transactions, headers=headers, tablefmt='psql'))
 
     cur.close()
     conn.close()
+
+def bayar_transaksi(customer_id):
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        query_histori = """
+        SELECT 
+            tr.id_transaksi AS "ID Transaksi", 
+            tr.ttl_diterima AS "Tgl Diterima", 
+            tr.ttl_selesai AS "Tgl Selesai",
+            jp.nama AS "Jenis Paket", 
+            ll.nama AS "Layanan Laundry", 
+            pf.nama AS "Jenis Parfum", 
+            mb.tipe_pembayaran AS "Metode Bayar", 
+            tr.subtotal AS "Subtotal", 
+            tr.ttl_brt AS "Total Berat",
+            tr.stat_bayar as "status pembayaran"
+        FROM 
+            transaksi tr
+        JOIN 
+            detail_layanan dl ON tr.detail_layanan_id_detail = dl.id_detail
+        JOIN 
+            jenis_paket jp ON dl.jenis_paket_id_pencucian = jp.id_pencucian
+        JOIN 
+            layanan_laundry ll ON dl.layanan_laundry_id_layanan = ll.id_layanan
+        JOIN 
+            jenis_parfum pf ON tr.jenis_parfum_id_parfum = pf.id_parfum
+        JOIN 
+            mtd_bayar mb ON tr.mtd_bayar_id_pembayaran = mb.id_pembayaran
+        JOIN
+            pelanggan pl ON tr.pelanggan_id_pelanggan = pl.id_pelanggan
+        WHERE
+            pl.id_pelanggan = %s and stat_bayar is null
+        """
+        cur.execute(query_histori, (customer_id,))
+        transactions = cur.fetchall()
+        
+        if not transactions:
+            print("Tidak ada transaksi yang ditemukan untuk pelanggan ini.")
+            return
+        
+        headers = ["ID Transaksi", "Tanggal Diterima", "Tanggal Selesai", "Jenis Paket", "Layanan Laundry", "Jenis Parfum", "Metode Pembayaran", "Subtotal", "Total Berat","status"]
+        print(tabulate(transactions, headers=headers, tablefmt='psql'))
+            
+        # Input the transaction ID
+        transaksi_id = input("Masukkan ID transaksi yang hendak dibayar: ")
+
+        # Fetch the transaction details
+        query = """
+        SELECT 
+            tr.id_transaksi, 
+            tr.subtotal, 
+            tr.ttl_brt
+        FROM 
+            transaksi tr
+        WHERE 
+            tr.id_transaksi = %s
+        """
+        cur.execute(query, (transaksi_id,))
+        transaksi = cur.fetchone()
+        
+        if not transaksi:
+            print(f"Transaksi dengan ID {transaksi_id} tidak ditemukan.")
+            return
+        
+        id_transaksi, subtotal, total_berat = transaksi
+        print(f"Subtotal: {subtotal}, Total Berat: {total_berat}")
+        
+        # Display available payment methods
+        cur.execute("SELECT id_pembayaran, tipe_pembayaran FROM mtd_bayar")
+        rows = cur.fetchall()
+        nama_kolom = ["ID Pembayaran", "Tipe Pembayaran"]
+        print(tabulate(rows, headers=nama_kolom, tablefmt='psql'))
+        metode_pembayaran = input("Pilih metode pembayaran (ID): ")
+        
+        # Process payment based on the chosen method
+        if metode_pembayaran == '1':  # Assuming '1' is for cash
+            amount_due = float(input("Masukkan nominal yang harus dibayar: "))
+            subtotal = float(subtotal)
+            if amount_due == subtotal:
+                confirm = input(f"Konfirmasi pembayaran sebesar {amount_due} (yes/no): ")
+                if confirm.lower() == 'yes':
+                    query = """
+                    UPDATE transaksi
+                    SET 
+                        status_pembayaran = 'Lunas',
+                        mtd_bayar_id_pembayaran = %s
+                    WHERE 
+                        id_transaksi = %s
+                    """
+                    cur.execute(query, (metode_pembayaran, id_transaksi))
+                    conn.commit()
+                    print("Pembayaran berhasil diproses.")
+                else:
+                    print("Pembayaran dibatalkan.")
+            elif amount_due > subtotal:
+                change = amount_due - subtotal
+                confirm = input(f"Nominal yang dibayar melebihi subtotal. Kembalian: {change}. Konfirmasi pembayaran (yes/no): ")
+                if confirm.lower() == 'yes':
+                    query = """
+                    UPDATE transaksi
+                    SET 
+                        stat_bayar = 'Lunas',
+                        mtd_bayar_id_pembayaran = %s
+                    WHERE 
+                        id_transaksi = %s
+                    """
+                    cur.execute(query, (metode_pembayaran, id_transaksi))
+                    conn.commit()
+                    print(f"Pembayaran berhasil diproses. Kembalian: {change}.")
+                else:
+                    print("Pembayaran dibatalkan.")
+            else:
+                print("Nominal yang dimasukkan kurang dari subtotal. Transaksi gagal.")
+        elif metode_pembayaran == '2':  # Assuming '2' is for transfer
+            rekening_number = input("Masukkan nomor rekening Anda: ")
+            confirm = input(f"Konfirmasi pembayaran dengan nomor rekening {rekening_number} (yes/no): ")
+            if confirm.lower() == 'yes':
+                query = """
+                UPDATE transaksi
+                SET 
+                    stat_bayar = 'Lunas',
+                    mtd_bayar_id_pembayaran = %s
+                WHERE 
+                    id_transaksi = %s
+                """
+                cur.execute(query, (metode_pembayaran, id_transaksi))
+                conn.commit()
+                print("Pembayaran berhasil diproses.")
+            else:
+                print("Pembayaran dibatalkan.")
+        else:
+            print("Metode pembayaran tidak valid.")
+            
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"Error: {e}")
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
 
 # Fungsi batal transaksi
 def cancel_transaction(customer_id):
@@ -338,41 +501,42 @@ def cancel_transaction(customer_id):
 
         # Tampilkan transaksi pelanggan terlebih dahulu
         query_histori = """
-            SELECT 
-                tr.id_transaksi AS "ID Transaksi", 
-                tr.ttl_diterima AS "Tgl Diterima", 
-                tr.ttl_selesai AS "Tgl Selesai", 
-                jp.nama AS "Jenis Paket", 
-                ll.nama AS "Layanan Laundry", 
-                pf.nama AS "Jenis Parfum", 
-                mb.tipe_pembayaran AS "Metode Bayar", 
-                tr.subtotal AS "Subtotal", 
-                tr.ttl_brt AS "Total Berat"
-            FROM 
-                transaksi tr
-            JOIN 
-                detail_layanan dl ON tr.detail_layanan_id_detail = dl.id_detail
-            JOIN 
-                jenis_paket jp ON dl.jenis_paket_id_pencucian = jp.id_pencucian
-            JOIN 
-                layanan_laundry ll ON dl.layanan_laundry_id_layanan = ll.id_layanan
-            JOIN 
-                jenis_parfum pf ON tr.jenis_parfum_id_parfum = pf.id_parfum
-            JOIN 
-                mtd_bayar mb ON tr.mtd_bayar_id_pembayaran = mb.id_pembayaran
-            JOIN
-                pelanggan pl ON tr.pelanggan_id_pelanggan = pl.id_pelanggan
-            WHERE
-                pl.id_pelanggan = %s
-            """
+        SELECT 
+            tr.id_transaksi AS "ID Transaksi", 
+            tr.ttl_diterima AS "Tgl Diterima", 
+            tr.ttl_selesai AS "Tgl Selesai",
+            jp.nama AS "Jenis Paket", 
+            ll.nama AS "Layanan Laundry", 
+            pf.nama AS "Jenis Parfum", 
+            mb.tipe_pembayaran AS "Metode Bayar", 
+            tr.subtotal AS "Subtotal", 
+            tr.ttl_brt AS "Total Berat",
+            tr.stat_bayar as "status pembayaran"
+        FROM 
+            transaksi tr
+        JOIN 
+            detail_layanan dl ON tr.detail_layanan_id_detail = dl.id_detail
+        JOIN 
+            jenis_paket jp ON dl.jenis_paket_id_pencucian = jp.id_pencucian
+        JOIN 
+            layanan_laundry ll ON dl.layanan_laundry_id_layanan = ll.id_layanan
+        JOIN 
+            jenis_parfum pf ON tr.jenis_parfum_id_parfum = pf.id_parfum
+        JOIN 
+            mtd_bayar mb ON tr.mtd_bayar_id_pembayaran = mb.id_pembayaran
+        JOIN
+            pelanggan pl ON tr.pelanggan_id_pelanggan = pl.id_pelanggan
+        WHERE
+            pl.id_pelanggan = %s and stat_bayar is null
+        """
         cur.execute(query_histori, (customer_id,))
         transactions = cur.fetchall()
-
+        
         if not transactions:
             print("Tidak ada transaksi yang ditemukan untuk pelanggan ini.")
             return
-
-        headers = ["ID Transaksi", "Tanggal Diterima", "Tanggal Selesai", "Jenis Paket", "Layanan Laundry", "Jenis Parfum", "Metode Pembayaran", "Subtotal", "Total Berat"]
+        
+        headers = ["ID Transaksi", "Tanggal Diterima", "Tanggal Selesai", "Jenis Paket", "Layanan Laundry", "Jenis Parfum", "Metode Pembayaran", "Subtotal", "Total Berat","status"]
         print(tabulate(transactions, headers=headers, tablefmt='psql'))
 
         # Meminta input ID transaksi yang ingin dibatalkan
@@ -397,6 +561,68 @@ def cancel_transaction(customer_id):
         if conn:
             conn.close()
 
+# fungsi konfirmasi Transaksi
+def proses_pembayaran(customer_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        transaksi_id = input("Masukkan ID Transaksi: ")
+        metode_pembayaran = input("Pilih metode pembayaran (1. Cash / 2. Transfer): ")
+
+        # Ambil detail transaksi
+        cur.execute("""
+            SELECT t.id_transaksi, t.subtotal FROM transaksi t 
+            WHERE t.id_transaksi = %s AND t.pelanggan_id_pelanggan = %s
+        """, (transaksi_id, customer_id))
+        transaksi = cur.fetchone()
+        if not transaksi:
+            print("Transaksi tidak ditemukan atau bukan milik Anda.")
+            return
+
+        id_transaksi, subtotal = transaksi
+
+        if metode_pembayaran == '1':  # Cash
+            nominal = (input("Masukkan nominal pembayaran: "))
+            if nominal < (subtotal):
+                print("Nominal tidak mencukupi.")
+                return
+            else:
+                kembalian = nominal - (subtotal)
+                print(f"Pembayaran berhasil. Kembalian Anda: {kembalian}")
+
+                # Insert into cash
+                cur.execute("""
+                    INSERT INTO cash (id_pembayaran, nominal, kembalian)
+                    VALUES (%s, %s, %s)
+                """, (id_transaksi, str(nominal), str(kembalian)))
+
+        elif metode_pembayaran == '2':  # Transfer
+            no_rekening = input("Masukkan nomor rekening: ")
+            print("Pembayaran via transfer berhasil.")
+
+            # Insert into transfer
+            cur.execute("""
+                INSERT INTO transfer (id_pembayaran, no_rek)
+                VALUES (%s, %s)
+            """, (id_transaksi, no_rekening))
+
+        else:
+            print("Metode pembayaran tidak valid.")
+            return
+        
+        # Update status pembayaran di database
+        cur.execute("""
+            UPDATE transaksi SET status_pembayaran = %s 
+            WHERE id_transaksi = %s
+        """, ('Lunas', id_transaksi))
+        conn.commit()
+        print("Transaksi berhasil diperbarui!")
+    except Exception as e:
+        conn.rollback()
+        print(f"Error: {e}")
+    finally:
+        cur.close()
+        conn.close()
 # Fungsi Log out
 def logout():
     print("Anda telah log out.")
@@ -418,7 +644,8 @@ def menu_pelanggan():
             print('3. Tambah transaksi baru')
             print('4. Histori Transaksi')
             print('5. Batalkan transaksi')
-            print('6. Log Out')
+            print('6. Pembayaran Transaksi')
+            print('7. Log Out')
         
         pilihan = input("Masukkan menu yang dipilih: ")
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -462,10 +689,12 @@ def menu_pelanggan():
             print('='*100)
             cancel_transaction(logged_in_id)
         elif pilihan == '6' and logged_in_id:
+            print('='*100)
+            print('Pembayaran Transaksi'.center(100))
+            print('='*100)
+            bayar_transaksi(logged_in_id)
+        elif pilihan == '7' and logged_in_id:
             logout()
             break
         else:
             print("Pilihan tidak valid, silahkan pilih menu yang tersedia")
-            
-
-# menu_pelanggan()
