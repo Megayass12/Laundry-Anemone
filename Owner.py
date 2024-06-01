@@ -1,12 +1,13 @@
 import psycopg2
 import datetime as dt
 from tabulate import tabulate
+import os
 
 def get_connection():
     return psycopg2.connect(
-        database='Anemone Abangkuh', 
+        database='anemonev6', 
         user='postgres', 
-        password='mega1234', 
+        password='321', 
         host='localhost', 
         port='5432'
     )
@@ -22,6 +23,7 @@ def login_owner():
     login_owner = cur.fetchone()
     cur.close()
     conn.close()
+    os.system('cls' if os.name == 'nt' else 'clear')
     if login_owner:
         print("Login berhasil!")
         menuowner()
@@ -116,28 +118,44 @@ def logout():
 # Fungsi menu utama
 def masukowner():
     while True:
-        print('\n====Selamat Datang Owner !====')
+        print('='*100)
+        print('====Login Owner !===='.center(100))
+        print('='*100)
         login_owner()
         break
 
 # Fungsi menu owner
 def menuowner():
     while True:
+        print('='*100)
+        print('Selamat Datang Owner!'.center(100))
+        print('='*100)
         print('1. Lihat Data Customer')
         print('2. Tambahkan Akun Admin Baru')
         print('3. Lihat Data Transaksi')
         print('4. Log Out')
         pilihan = input("Masukkan menu yang dipilih:")
-
+        os.system('cls' if os.name == 'nt' else 'clear')
 
         if pilihan == '1':
+            print('='*150)
+            print('Data Customer'.center(150))
+            print('='*150)
             lihat_pelanggan()
         elif pilihan == '2':
+            print('='*150)
+            print('Tambahkan Akun Pegawai'.center(150))
+            print('='*150)
             tambah_pegawai()
         elif pilihan == '3':
+            print('='*190)
+            print('Data Transaksi'.center(190))
+            print('='*190)
             lihat_transaksi()
         elif pilihan == '4':
             logout()
             break
         else:
             print("Pilihan tidak valid, silahkan pilih menu yang tersedia")
+
+# menuowner()
