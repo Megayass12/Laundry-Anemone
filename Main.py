@@ -1,6 +1,6 @@
-import Admin as ad
-import Owner as ow
-import Customer as pel
+import admin as ad
+import owner as ow
+import pelanggan as pel
 from tabulate import tabulate
 
 
@@ -12,7 +12,7 @@ def main():
         print('='*100)
         print('1. Masuk sebagai owner') # Register
         print('2. Masuk sebagai admin') # Login
-        print('3. Masuk sebagai customer')
+        print('3. Masuk sebagai pelanggan')
         masuk = input(f'Pilih opsi di atas : ')
         
         if masuk == '1':
