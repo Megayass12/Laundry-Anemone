@@ -130,7 +130,7 @@ def menuowner():
         print('='*100)
         print('Selamat Datang Owner!'.center(100))
         print('='*100)
-        print('1. Lihat Data Customer')
+        print('1. Lihat Data Pelanggan')
         print('2. Tambahkan Akun Admin Baru')
         print('3. Lihat Data Transaksi')
         print('4. Log Out')
@@ -139,7 +139,7 @@ def menuowner():
 
         if pilihan == '1':
             print('='*150)
-            print('Data Customer'.center(150))
+            print('Data Pelanggan'.center(150))
             print('='*150)
             lihat_pelanggan()
         elif pilihan == '2':
