@@ -5,9 +5,9 @@ import os
 
 def get_connection():
     return psycopg2.connect(
-        database='Anemone Abangkuh', 
+        database='anemonev6', 
         user='postgres', 
-        password='mega1234', 
+        password='321', 
         host='localhost', 
         port='5432'
     )
