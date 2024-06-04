@@ -3,8 +3,6 @@ import owner as ow
 import pelanggan as pel
 from tabulate import tabulate
 
-
-
 def main():
     while True:
         print('='*100)
