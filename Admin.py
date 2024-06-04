@@ -4,9 +4,9 @@ from tabulate import tabulate
 
 def get_connection():
     return psycopg2.connect(
-        database='Anemone Abangkuh', 
+        database='anemonev6', 
         user='postgres', 
-        password='mega1234', 
+        password='321', 
         host='localhost', 
         port='5432'
     )
@@ -46,32 +46,32 @@ def lihat_pelanggan():
     # for i in pelanggan:
     print(tabulate(pelanggan, headers=col_names, tablefmt="pretty"))
 
-# def edit_data_pelanggan():
-#     conn = get_connection()
-#     cur = conn.cursor()
+def edit_data_pelanggan():
+    conn = get_connection()
+    cur = conn.cursor()
 
-#     query = """
-#     SELECT pel.id_pelanggan, pel.nama, pel.nomor, pel.username, pel.password, al.detail ||','||kel.nama||','||kec.nama||','||al.kabupaten as Alamat
-#     from pelanggan pel
-#     join alamat al on al.id_rumah = pel.alamat_id_rumah 
-#     join kecamatan kec ON kec.id_kecamatan = al.kecamatan_id_kecamatan
-#     join kelurahan kel ON kel.id_kelurahan = al.kelurahan_id_kelurahan"""
-#     cur.execute(query)
-#     pelanggan = cur.fetchall()
-#     col_names = [desc[0] for desc in cur.description]
-#     print(tabulate(pelanggan, headers=col_names, tablefmt="pretty"))
+    query = """
+    SELECT pel.id_pelanggan, pel.nama, pel.nomor, pel.username, pel.password, al.detail ||','||kel.nama||','||kec.nama||','||al.kabupaten as Alamat
+    from pelanggan pel
+    join alamat al on al.id_rumah = pel.alamat_id_rumah 
+    join kecamatan kec ON kec.id_kecamatan = al.kecamatan_id_kecamatan
+    join kelurahan kel ON kel.id_kelurahan = al.kelurahan_id_kelurahan"""
+    cur.execute(query)
+    pelanggan = cur.fetchall()
+    col_names = [desc[0] for desc in cur.description]
+    print(tabulate(pelanggan, headers=col_names, tablefmt="pretty"))
 
-#     pelanggan_id = input("Masukkan ID customer yang ingin diedit: ")
+    pelanggan_id = input("Masukkan ID customer yang ingin diedit: ")
     
-#     nama = input("Nama baru: ")
-#     nomor = input("Nomor baru: ")
-#     # alamat = input("Alamat baru: ")
-#     query = "UPDATE pelanggan SET nama = %s, nomor = %s WHERE id_pelanggan = %s"
-#     cur.execute(query, (nama, nomor, pelanggan_id))
-#     conn.commit()
-#     cur.close()
-#     conn.close()
-#     print("Data customer berhasil diperbarui!")
+    nama = input("Nama baru: ")
+    nomor = input("Nomor baru: ")
+    # alamat = input("Alamat baru: ")
+    query = "UPDATE pelanggan SET nama = %s, nomor = %s WHERE id_pelanggan = %s"
+    cur.execute(query, (nama, nomor, pelanggan_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+    print("Data customer berhasil diperbarui!")
 
 def lihat_transaksi():
     conn = get_connection()
@@ -165,7 +165,7 @@ def edit_transaksi():
         JOIN 
             pegawai pg ON tr.pegawai_id_pegawai = pg.id_pegawai
         where
-            stat_bayar is null
+            stat_bayar = 'Belum Lunas'
         """
         cur.execute(query_all_transaksi)
         all_transaksi = cur.fetchall()
@@ -254,7 +254,6 @@ def menuAdmin():
     while True :
         print("Lanjutkan ke menu berikutnya.")
         print('1. Lihat Data Pelanggan')
-        # print('2. Edit Data Pelanggan')
         print('2. Lihat Data Transaksi')
         print('3. Edit Data Transaksi')
         print('4. Logout')
@@ -270,4 +269,6 @@ def menuAdmin():
             logout()
             break
         else:
-            print("Pilihan tidak valid, silakan pilih angka 1 sampai 4")
+            print("Pilihan tidak valid, silakan pilih angka 1 sampai 5")
+
+# menuAdmin()
