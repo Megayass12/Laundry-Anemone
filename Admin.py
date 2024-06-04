@@ -4,9 +4,9 @@ from tabulate import tabulate
 
 def get_connection():
     return psycopg2.connect(
-        database='anemonev6', 
+        database='Anemone Abangkuh2', 
         user='postgres', 
-        password='321', 
+        password='mega1234', 
         host='localhost', 
         port='5432'
     )
@@ -90,7 +90,8 @@ SELECT
     prfm.nama AS nama_parfum, 
     dtl.harga, 
     pkt.nama AS paket_laundry, 
-    lyn.nama AS layanan_laundry
+    lyn.nama AS layanan_laundry,
+    t.stat_bayar
 FROM 
     transaksi t
 JOIN 
@@ -149,7 +150,8 @@ def edit_transaksi():
             mb.tipe_pembayaran, 
             tr.subtotal, 
             tr.ttl_brt, 
-            pg.nama AS pegawai
+            pg.nama AS pegawai,
+            tr.stat_bayar
         FROM 
             transaksi tr
         JOIN 
@@ -170,7 +172,7 @@ def edit_transaksi():
         cur.execute(query_all_transaksi)
         all_transaksi = cur.fetchall()
         if all_transaksi:
-            headers = ["ID Transaksi", "Tanggal Diterima", "Tanggal Selesai", "Jenis Paket", "Layanan Laundry", "Jenis Parfum", "Metode Pembayaran", "Subtotal", "Total Berat", "Pegawai"]
+            headers = ["ID Transaksi", "Tanggal Diterima", "Tanggal Selesai", "Jenis Paket", "Layanan Laundry", "Jenis Parfum", "Metode Pembayaran", "Subtotal", "Total Berat", "Pegawai","Status Bayar"]
             print(tabulate(all_transaksi, headers=headers, tablefmt='psql'))
         else:
             print("Tidak ada transaksi yang ditemukan.")

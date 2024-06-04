@@ -1,6 +1,6 @@
-import admin as ad
-import owner as ow
-import pelanggan as pel
+import Admin as ad
+import Owner as ow
+import Customer as pel
 from tabulate import tabulate
 
 def main():
@@ -14,7 +14,7 @@ def main():
         masuk = input(f'Pilih opsi di atas : ')
         
         if masuk == '1':
-            ow.masukowner()  #jgn lupa kurung hehe
+            ow.masukowner() 
         elif masuk == '2':
             ad.masukadmin()
         elif masuk == '3':
